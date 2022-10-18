@@ -1,0 +1,21 @@
+{
+  "name": "cleanup",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.190.0",
+    "@aws-sdk/credential-providers": "^3.190.0",
+    "i": "^0.3.7",
+    "npm": "^8.19.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0",
+    "prettier": "^2.7.1"
+  }
+}

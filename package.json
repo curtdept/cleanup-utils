@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-ecs": "^3.204.0",
     "@aws-sdk/client-lambda": "^3.190.0",
     "@aws-sdk/credential-providers": "^3.190.0",
+    "@aws-sdk/util-arn-parser": "^3.201.0",
     "i": "^0.3.7",
     "npm": "^8.19.2"
   },

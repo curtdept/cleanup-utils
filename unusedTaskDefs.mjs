@@ -18,17 +18,11 @@ import arn from "@aws-sdk/util-arn-parser";
 
 const numToKeep = 5;
 const awsRegion = "us-west-2";
-const whiteList = [
-  "sftp-s3-sync-stage",
-  "sftp-s3-sync-prod",
-  "jenkins-slave-fargate",
-  "kaniko-stage",
-  "jenkins-slave",
-];
+const whiteList = ["us-west-2-jenkins-slave", "us-west-2-jenkins-kaniko"];
 
 const client = new ECSClient({
   region: awsRegion,
-  credentials: fromSSO({ profile: "stage" }),
+  credentials: fromSSO({ profile: "legacy-stage" }),
   maxAttempts: 100,
 });
 
@@ -42,12 +36,12 @@ async function main() {
   let otherArns = new Map();
 
   const cList = await client.send(
-    new ListClustersCommand({ region: awsRegion })
+    new ListClustersCommand({ region: awsRegion }),
   );
 
   for await (const data of paginateListClusters(
     { client },
-    { nextToken: cList.nextToken }
+    { nextToken: cList.nextToken },
   )) {
     for (const cluster of data.clusterArns) {
       clusters.add(cluster);
@@ -56,12 +50,12 @@ async function main() {
 
   for (const cluster of clusters.values()) {
     const tList = await client.send(
-      new ListTasksCommand({ region: awsRegion, cluster })
+      new ListTasksCommand({ region: awsRegion, cluster }),
     );
 
     for await (const data of paginateListTasks(
       { client },
-      { nextToken: tList.nextToken, cluster }
+      { nextToken: tList.nextToken, cluster },
     )) {
       for (const task of data.taskArns) {
         taskArns.set(task, { cluster, taskArn: task });
@@ -75,7 +69,7 @@ async function main() {
         region: awsRegion,
         tasks: [task.taskArn],
         cluster: task.cluster,
-      })
+      }),
     );
 
     for (const t of tDesc.tasks) {
@@ -85,12 +79,12 @@ async function main() {
 
   for (const cluster of clusters.values()) {
     const tList = await client.send(
-      new ListServicesCommand({ region: awsRegion, cluster })
+      new ListServicesCommand({ region: awsRegion, cluster }),
     );
 
     for await (const data of paginateListServices(
       { client },
-      { nextToken: tList.nextToken, cluster }
+      { nextToken: tList.nextToken, cluster },
     )) {
       for (const service of data.serviceArns) {
         serviceArns.set(service, { cluster, serviceArn: service });
@@ -104,7 +98,7 @@ async function main() {
         region: awsRegion,
         services: [service.serviceArn],
         cluster: service.cluster,
-      })
+      }),
     );
 
     for (const s of sDesc.services) {
@@ -113,12 +107,12 @@ async function main() {
   }
 
   const fList = await client.send(
-    new ListTaskDefinitionsCommand({ region: awsRegion })
+    new ListTaskDefinitionsCommand({ region: awsRegion }),
   );
 
   for await (const data of paginateListTaskDefinitions(
     { client },
-    { nextToken: fList.nextToken }
+    { nextToken: fList.nextToken },
   )) {
     for (const def of data.taskDefinitionArns) {
       defs.add(def);
@@ -140,7 +134,7 @@ async function main() {
           new DescribeTaskDefinitionCommand({
             region: awsRegion,
             taskDefinition: td,
-          })
+          }),
         );
 
         if (otherArns.has(tDef.taskDefinition.family)) {
@@ -176,7 +170,7 @@ async function main() {
       ":",
       fParsed.accountId,
       ":",
-      fParsed.resource.substring(0, fParsed.resource.indexOf(":"))
+      fParsed.resource.substring(0, fParsed.resource.indexOf(":")),
     );
 
     let vers = new Set();
@@ -186,8 +180,8 @@ async function main() {
       const v = Number(
         p.resource.substring(
           fParsed.resource.indexOf(":") + 1,
-          p.resource.length
-        )
+          p.resource.length,
+        ),
       );
       vers.add(v);
     }
@@ -208,7 +202,7 @@ async function main() {
       new DeregisterTaskDefinitionCommand({
         region: awsRegion,
         taskDefinition: t,
-      })
+      }),
     );
   }
 }

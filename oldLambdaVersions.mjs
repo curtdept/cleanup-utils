@@ -18,7 +18,7 @@ const client = new LambdaClient({
 
 async function main() {
   const fList = await client.send(
-    new ListFunctionsCommand({ region: awsRegion })
+    new ListFunctionsCommand({ region: awsRegion }),
   );
 
   for (let func of fList.Functions) {
@@ -26,7 +26,7 @@ async function main() {
 
     for await (const data of paginateListVersionsByFunction(
       { client },
-      { FunctionName: func.FunctionName }
+      { FunctionName: func.FunctionName },
     )) {
       resVer.push(...(data.Versions ?? []));
     }
@@ -39,7 +39,7 @@ async function main() {
     }
 
     let resAlias = await client.send(
-      new ListAliasesCommand({ FunctionName: func.FunctionArn })
+      new ListAliasesCommand({ FunctionName: func.FunctionArn }),
     );
 
     for (const row of resAlias.Aliases) {
@@ -52,7 +52,7 @@ async function main() {
     }
 
     let remVerList = Array.from(
-      new Int32Array(verList.values()).sort().reverse()
+      new Int32Array(verList.values()).sort().reverse(),
     );
 
     remVerList.splice(0, keepversions);
@@ -63,7 +63,7 @@ async function main() {
       await client.send(
         new DeleteFunctionCommand({
           FunctionName: arn,
-        })
+        }),
       );
     }
   }
